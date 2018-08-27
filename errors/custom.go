@@ -1,9 +1,9 @@
 package errors
 
 import (
-	"runtime"
 	"fmt"
 	"path/filepath"
+	"runtime"
 )
 
 /**
@@ -11,7 +11,7 @@ import (
  * Created by cxnky on 24/08/2018 at 14:21
  * errors
  * https://github.com/cxnky/
- 
+
 **/
 
 func NewError(message string) error {

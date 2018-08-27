@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"runtime"
-	"path/filepath"
-	"os"
 	"github.com/cxnky/goupdate/errors"
+	"os"
+	"path/filepath"
+	"runtime"
 )
 
 /**
@@ -12,7 +12,7 @@ import (
  * Created by cxnky on 23/08/2018 at 15:29
  * utils
  * https://github.com/cxnky/
- 
+
 **/
 
 // GetOSName returns the name of the current operating system

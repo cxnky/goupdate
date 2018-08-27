@@ -1,18 +1,18 @@
 package goupdate
 
 import (
-	"net/http"
-	"time"
-	"io/ioutil"
 	"encoding/json"
+	"fmt"
+	"github.com/cxnky/goupdate/errors"
 	"github.com/cxnky/goupdate/utils"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"path/filepath"
-	"log"
-	"github.com/cxnky/goupdate/errors"
-	"fmt"
 	"strconv"
-	"io"
+	"time"
 )
 
 /**
@@ -24,44 +24,36 @@ import (
 **/
 
 const (
-
 	VERSION = "1.0.0.0"
-
 )
 
 type Updater struct {
+	VersionURL     string
+	CurrentVersion string
+	CheckFrequency int
+	ShowProgress   bool
 
-	VersionURL			string
-	CurrentVersion		string
-	CheckFrequency		int
-	ShowProgress		bool
-
-	isInitialised		bool
-	shouldAutoCheck		bool
-	webClient			http.Client
-	logger				*log.Logger
-
+	isInitialised   bool
+	shouldAutoCheck bool
+	webClient       http.Client
+	logger          *log.Logger
 }
 
 type updateResponse struct {
-
-	Version		string   `json:"version"`
-	Changelog	string 	 `json:"changelog"`
-	FileURL		string 	 `json:"url"`
-	SHA256Hash 	string	 `json:"hash"`
-
+	Version    string `json:"version"`
+	Changelog  string `json:"changelog"`
+	FileURL    string `json:"url"`
+	SHA256Hash string `json:"hash"`
 }
 
 var (
-
 	updateResp = updateResponse{}
-
 )
 
 // CreateUpdater creates and returns a constructed Updater object using a url, current version and check frequency (0 for off)
 func CreateUpdater(url, currentVersion string, checkFrequency int, showProgress bool) Updater {
 
-	updater := Updater{isInitialised:true}
+	updater := Updater{isInitialised: true}
 
 	if checkFrequency == 0 {
 
@@ -80,7 +72,7 @@ func CreateUpdater(url, currentVersion string, checkFrequency int, showProgress 
 	updater.webClient = http.Client{Timeout: 10 * time.Second}
 	updater.ShowProgress = showProgress
 
-	updater.logger = log.New(os.Stderr, "goupdate: ", log.LstdFlags | log.Lshortfile)
+	updater.logger = log.New(os.Stderr, "goupdate: ", log.LstdFlags|log.Lshortfile)
 	return updater
 
 }
@@ -107,12 +99,12 @@ func (u Updater) PerformUpdate() error {
 	if osys == "windows" {
 
 		// move file to <name>.bak (windows supports renaming executables whilst running)
-		os.Rename(fullPath, fullPath + ".bak")
+		os.Rename(fullPath, fullPath+".bak")
 
 	} else if osys == "linux" {
 
 		// replace the file (linux supports replacing running executables)
-		os.Rename(fullPath, fullPath + "-bak")
+		os.Rename(fullPath, fullPath+"-bak")
 
 	}
 
@@ -120,17 +112,16 @@ func (u Updater) PerformUpdate() error {
 	u.downloadUpdate(pwd)
 
 	// validate the checksum of the downloaded file
-	if !utils.ValidateChecksum(pwd + "\\update.zip", updateResp.SHA256Hash) {
-
+	if !utils.ValidateChecksum(pwd+"\\update.zip", updateResp.SHA256Hash) {
 
 		// rename the file
 		if osys == "windows" {
 
-			os.Rename(fullPath + ".bak", fullPath)
+			os.Rename(fullPath+".bak", fullPath)
 
 		} else if osys == "linux" {
 
-			os.Rename(fullPath + "-bak", fullPath)
+			os.Rename(fullPath+"-bak", fullPath)
 
 		}
 
@@ -147,7 +138,7 @@ func (u Updater) PerformUpdate() error {
 	} else {
 
 		// checksum matches, unzip.
-		utils.Unzip(pwd + "\\update.zip", pwd)
+		utils.Unzip(pwd+"\\update.zip", pwd)
 
 		err := os.Remove(pwd + "\\update.zip")
 
@@ -193,41 +184,41 @@ func printDownloadPercent(done chan int64, path string, total int64) {
 
 		select {
 
-			case <-done:
-				stop = true
+		case <-done:
+			stop = true
 
-				default:
+		default:
 
-					file, err := os.Open(path)
+			file, err := os.Open(path)
 
-					if err != nil {
+			if err != nil {
 
-						errors.NewError(err.Error())
-						return
+				errors.NewError(err.Error())
+				return
 
-					}
+			}
 
-					fi, err := file.Stat()
+			fi, err := file.Stat()
 
-					if err != nil {
+			if err != nil {
 
-						errors.NewError(err.Error())
-						return
+				errors.NewError(err.Error())
+				return
 
-					}
+			}
 
-					size := fi.Size()
+			size := fi.Size()
 
-					if size == 0 {
+			if size == 0 {
 
-						size = 1
+				size = 1
 
-					}
+			}
 
-					var percent float64 = float64(size) / float64(total) * 100
+			var percent float64 = float64(size) / float64(total) * 100
 
-					fmt.Printf("%.0f", percent)
-					fmt.Println("%")
+			fmt.Printf("%.0f", percent)
+			fmt.Println("%")
 
 		}
 
@@ -276,7 +267,7 @@ func (u Updater) downloadUpdate(directory string) error {
 
 		done := make(chan int64)
 
-		go printDownloadPercent(done, directory + "\\update.zip", int64(size))
+		go printDownloadPercent(done, directory+"\\update.zip", int64(size))
 
 		resp, err := http.Get(updateResp.FileURL)
 
@@ -375,7 +366,7 @@ func (u Updater) CheckForUpdate() (available bool, err error) {
 
 	}
 
-	r.Header.Set("User-Agent", "GoUpdate v" + VERSION + " (https://github.com/cxnky/goupdate)")
+	r.Header.Set("User-Agent", "GoUpdate v"+VERSION+" (https://github.com/cxnky/goupdate)")
 
 	res, err := u.webClient.Do(r)
 
@@ -412,6 +403,5 @@ func (u Updater) CheckForUpdate() (available bool, err error) {
 		return false, nil
 
 	}
-
 
 }

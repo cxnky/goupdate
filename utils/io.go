@@ -1,14 +1,14 @@
 package utils
 
 import (
+	"archive/zip"
 	"crypto/sha256"
-	"io/ioutil"
 	"encoding/hex"
 	"github.com/cxnky/goupdate/errors"
-	"archive/zip"
+	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"io"
 )
 
 /**
@@ -16,7 +16,7 @@ import (
  * Created by cxnky on 24/08/2018 at 18:13
  * utils
  * https://github.com/cxnky/
- 
+
 **/
 
 func Unzip(src, dest string) error {
