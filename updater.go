@@ -122,7 +122,7 @@ func (u Updater) PerformUpdate() error {
 	// validate the checksum of the downloaded file
 	if !utils.ValidateChecksum(pwd + "\\update.zip", updateResp.SHA256Hash) {
 
-		errors.NewError("checksum did not match.")
+		return errors.NewError("checksum did not match.")
 
 	}
 
