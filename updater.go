@@ -23,10 +23,12 @@ import (
 
 **/
 
+// Define the version of GoUpdate
 const (
 	VERSION = "1.0.0.0"
 )
 
+// Updater is the updater object which contains the information needed for GoUpdate to function properly
 type Updater struct {
 	VersionURL     string
 	CurrentVersion string

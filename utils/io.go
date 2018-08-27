@@ -19,6 +19,7 @@ import (
 
 **/
 
+// Unzip will unzip the downloaded update to the PWD.
 func Unzip(src, dest string) error {
 
 	r, err := zip.OpenReader(src)
@@ -102,6 +103,7 @@ func Unzip(src, dest string) error {
 
 }
 
+// ValidateChecksum will validate the checksum with the one that has been supplied at update.json to ensure it has been downloaded properly and not modified by a third party.
 func ValidateChecksum(filePath, expectedChecksum string) bool {
 
 	hasher := sha256.New()

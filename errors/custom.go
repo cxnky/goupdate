@@ -14,6 +14,7 @@ import (
 
 **/
 
+// NewError is a custom error which pretty prints an error
 func NewError(message string) error {
 
 	_, file, line, _ := runtime.Caller(1)
