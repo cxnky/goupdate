@@ -122,7 +122,62 @@ func (u Updater) PerformUpdate() error {
 	// validate the checksum of the downloaded file
 	if !utils.ValidateChecksum(pwd + "\\update.zip", updateResp.SHA256Hash) {
 
-		return errors.NewError("checksum did not match.")
+
+		// rename the file
+		if osys == "windows" {
+
+			os.Rename(fullPath + ".bak", fullPath)
+
+		} else if osys == "linux" {
+
+			os.Rename(fullPath + "-bak", fullPath)
+
+		}
+
+		err := os.Remove(pwd + "\\update.zip")
+
+		if err != nil {
+
+			return errors.NewError(err.Error())
+
+		}
+
+		return errors.NewError("checksum did not match. reverting changes...")
+
+	} else {
+
+		// checksum matches, unzip.
+		utils.Unzip(pwd + "\\update.zip", pwd)
+
+		err := os.Remove(pwd + "\\update.zip")
+
+		if err != nil {
+
+			return errors.NewError(err.Error())
+
+		}
+
+		if osys == "windows" {
+
+			err := os.Remove(fullPath + ".bak")
+
+			if err != nil {
+
+				return errors.NewError(err.Error())
+
+			}
+
+		} else if osys == "linux" {
+
+			err := os.Remove(fullPath + "-bak")
+
+			if err != nil {
+
+				return errors.NewError(err.Error())
+
+			}
+
+		}
 
 	}
 
@@ -244,7 +299,7 @@ func (u Updater) downloadUpdate(directory string) error {
 		done <- n
 
 		elapsed := time.Since(start)
-		fmt.Printf("Update download completed in %s", elapsed)
+		fmt.Printf("Update download completed in %s\n", elapsed)
 
 	} else {
 
